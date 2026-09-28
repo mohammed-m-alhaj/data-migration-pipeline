@@ -32,5 +32,7 @@ jobs:
           pip install -r requirements.txt
 
       - name: Run PyTest Test Suite
+        env:
+          PYTHONPATH: .
         run: |
           pytest
