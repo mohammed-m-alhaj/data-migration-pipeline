@@ -3974,5 +3974,44 @@
       "MISSING_ORDER_ID": 25,
       "DUPLICATE_ORDER_ID": 25
     }
+  },
+  {
+    "run_id": "c87ce776a1f14977aaf12ab73e9d0476",
+    "file_name": "orders_sample.csv",
+    "file_size_mb": 0.28,
+    "engine_used": "python_batch",
+    "source_file": "C:\\Users\\Al-Haj\\Desktop\\Enterprise Data Migration & Quality Pipeline\\data\\orders_sample.csv",
+    "threshold_mb": 200,
+    "rows_read": 1000,
+    "raw_loaded": 1000,
+    "batch_failures": 0,
+    "batch_size": 2000,
+    "batches": 1,
+    "elapsed_seconds": 0.03946060000453144,
+    "throughput": 25341.733270278844,
+    "mongo_database": "migration_pipeline",
+    "mongo_uri": "mongodb://127.0.0.1:27017",
+    "id_run": "c87ce776a1f14977aaf12ab73e9d0476",
+    "raw_count": 1000,
+    "valid_count": 700,
+    "corrected_count": 200,
+    "quarantine_count": 100,
+    "inserted_count": 0,
+    "updated_count": 0,
+    "unchanged_count": 900,
+    "elt_elapsed_seconds": 18.670631999964826,
+    "elt_throughput": 53.56005088643405,
+    "elt_spark_master": "local[*]",
+    "elt_actual_spark_master": "local[*]",
+    "elt_application_id": "local-1790627616403",
+    "error_case_counts": {
+      "CORRUPTED_ITEMS_JSON": 25,
+      "EMPTY_ITEMS": 25,
+      "MULTIPLE_CONFLICTING_ERRORS": 50,
+      "UNKNOWN_PRICE": 25,
+      "INVALID_IMPOSSIBLE_DATE": 25,
+      "MISSING_ORDER_ID": 25,
+      "DUPLICATE_ORDER_ID": 25
+    }
   }
 ]

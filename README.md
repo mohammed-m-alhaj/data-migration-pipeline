@@ -21,6 +21,10 @@
 
 </div>
 
+<p align="center">
+  <img src="assets/terminal_execution.svg" alt="Automated Pipeline Execution & Idempotency Verification" width="860">
+</p>
+
 ---
 
 ## 💡 Why `data-migration-pipeline`?
