@@ -28,7 +28,7 @@ SMALL_FILE_THRESHOLD_MB = int(os.getenv("SMALL_FILE_THRESHOLD_MB", "200"))  # Br
 # MongoDB Database & Collection Names
 # ---------------------------------------------------------------------------
 MONGO_URI = os.getenv("MONGO_URI", "mongodb://127.0.0.1:27017")
-MONGO_DATABASE = os.getenv("MONGO_DATABASE", "midterm_pipeline")
+MONGO_DATABASE = os.getenv("MONGO_DATABASE", "migration_pipeline")
 MONGO_TIMEOUT_MS = int(os.getenv("PIPELINE_MONGO_TIMEOUT_MS", "5000"))
 
 RAW_COLLECTION = os.getenv("MONGO_RAW_COLLECTION", "orders_raw")
@@ -48,7 +48,7 @@ SPARK_MASTER_URL = os.getenv("PIPELINE_SPARK_MASTER", "local[*]")
 ALLOW_SPARK_LOCAL_FALLBACK = os.getenv("PIPELINE_ALLOW_SPARK_LOCAL_FALLBACK", "true").lower() in ("1", "true", "yes")
 DISABLE_SPARK_FALLBACK = os.getenv("PIPELINE_DISABLE_SPARK_FALLBACK", "false").lower() in ("1", "true", "yes")
 
-SPARK_APP_NAME = os.getenv("PIPELINE_SPARK_APP_NAME", "MidtermDataPipeline")
+SPARK_APP_NAME = os.getenv("PIPELINE_SPARK_APP_NAME", "DataMigrationPipeline")
 SPARK_LOG_LEVEL = os.getenv("PIPELINE_SPARK_LOG_LEVEL", "WARN")
 SPARK_PARTITIONS = int(os.getenv("PIPELINE_SPARK_PARTITIONS", "16"))
 SPARK_WRITE_BATCH_SIZE = int(os.getenv("PIPELINE_SPARK_WRITE_BATCH_SIZE", "512"))

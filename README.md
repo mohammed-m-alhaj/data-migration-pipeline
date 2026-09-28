@@ -12,6 +12,7 @@
   <a href="https://www.python.org/"><img src="https://img.shields.io/badge/Python-3.11+-3776AB?style=for-the-badge&logo=python&logoColor=white" alt="Python 3.11+"></a>
   <a href="https://spark.apache.org/"><img src="https://img.shields.io/badge/Apache_Spark-3.5%20%7C%204.2-E25A1C?style=for-the-badge&logo=apachespark&logoColor=white" alt="Apache Spark"></a>
   <a href="https://www.mongodb.com/"><img src="https://img.shields.io/badge/MongoDB-7.0%20%7C%208.0-47A248?style=for-the-badge&logo=mongodb&logoColor=white" alt="MongoDB"></a>
+  <a href="https://github.com/mohammed-m-alhaj/data-migration-pipeline/actions/workflows/ci.yml"><img src="https://img.shields.io/github/actions/workflow/status/mohammed-m-alhaj/data-migration-pipeline/ci.yml?branch=main&style=for-the-badge&logo=githubactions&logoColor=white&label=CI%20Build" alt="CI Status"></a>
   <a href="https://docs.pytest.org/"><img src="https://img.shields.io/badge/Tests-15%20Passed%20%7C%20100%25-brightgreen?style=for-the-badge&logo=pytest&logoColor=white" alt="PyTest Suite"></a>
   <a href="https://github.com/mohammed-m-alhaj/data-migration-pipeline/pulls"><img src="https://img.shields.io/badge/PRs-Welcome-brightgreen?style=for-the-badge" alt="PRs Welcome"></a>
 </p>
@@ -51,12 +52,13 @@ python -m venv .venv
 pip install -r requirements.txt
 ```
 
-### 2. Configure Environment (`.env`)
+### 2. Start Database (Local or 1-Click Docker)
 ```bash
-# Defaults connect directly to a standard local MongoDB instance
-echo "MONGO_URI=mongodb://127.0.0.1:27017" > .env
-echo "MONGO_DATABASE=midterm_pipeline" >> .env
-echo "PIPELINE_SPARK_MASTER=local[*]" >> .env
+# Option A: Start MongoDB via Docker Compose
+docker compose up -d
+
+# Option B: Use existing local MongoDB instance
+# (Defaults in settings.py point to mongodb://127.0.0.1:27017/migration_pipeline)
 ```
 
 ### 3. Initialize & Run
@@ -64,8 +66,8 @@ echo "PIPELINE_SPARK_MASTER=local[*]" >> .env
 # Initialize MongoDB collections, indexes, and strict JSON schemas
 python src/mongo_setup.py
 
-# Run the automated multi-scenario test suite (generates test files & runs end-to-end)
-python src/run_4_files_full_test.py
+# Run pipeline directly on the provided sample dataset
+python src/main.py --file data/orders_sample.csv
 ```
 
 ### 4. Run PyTest Unit Tests
@@ -495,7 +497,7 @@ mongosh --version  # Expect: mongosh version 2.x+
 
    # MongoDB Configuration
    MONGO_URI=mongodb://127.0.0.1:27017
-   MONGO_DATABASE=midterm_pipeline
+   MONGO_DATABASE=migration_pipeline
    MONGO_RAW_COLLECTION=orders_raw
    MONGO_VALIDATED_COLLECTION=orders_validated
    MONGO_QUARANTINE_COLLECTION=orders_quarantine

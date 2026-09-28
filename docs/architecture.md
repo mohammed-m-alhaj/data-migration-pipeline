@@ -1,6 +1,6 @@
 # 🏛️ Architecture & System Design Document
 
-This document provides a comprehensive technical overview of the **Enterprise Hybrid Data Pipeline** designed for the Big Data Practical Midterm Project (Razi University).
+This document provides a comprehensive technical overview of the **Hybrid Data Migration & Quality Pipeline**, an open-source, production-grade data engineering system designed for high-throughput batch and distributed data processing.
 
 ---
 

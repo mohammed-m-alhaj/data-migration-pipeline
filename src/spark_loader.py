@@ -105,7 +105,7 @@ def create_spark() -> SparkSession:
         .config("spark.shutdown.hook.enabled", "false")
         .config("spark.driver.extraJavaOptions", "-Dlog4j2.shutdownHookEnabled=false -Dorg.apache.spark.suppressShutdownLogging=true")
         .config("spark.executor.extraJavaOptions", "-Dlog4j2.shutdownHookEnabled=false -Dorg.apache.spark.suppressShutdownLogging=true")
-        .config("spark.local.dir", str(Path(os.environ.get("TEMP", str(PROJECT_ROOT / ".spark_temp"))) / "midterm_spark_temp"))
+        .config("spark.local.dir", str(Path(os.environ.get("TEMP", str(PROJECT_ROOT / ".spark_temp"))) / "spark_temp"))
     )
 
     ivy_jars = list(IVY_JARS_DIR.glob("*.jar")) if IVY_JARS_DIR.is_dir() else []
@@ -164,7 +164,7 @@ def create_spark() -> SparkSession:
                     .config("spark.sql.ansi.enabled", "false")
                     .config("spark.sql.adaptive.enabled", "true")
                     .config("spark.serializer", "org.apache.spark.serializer.KryoSerializer")
-                    .config("spark.local.dir", str(Path(os.environ.get("TEMP", str(PROJECT_ROOT / ".spark_temp"))) / "midterm_spark_temp"))
+                    .config("spark.local.dir", str(Path(os.environ.get("TEMP", str(PROJECT_ROOT / ".spark_temp"))) / "spark_temp"))
                 )
                 spark = builder.getOrCreate()
                 spark.sparkContext.setLogLevel(SPARK_LOG_LEVEL)
