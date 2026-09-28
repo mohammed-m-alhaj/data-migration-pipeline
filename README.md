@@ -1,11 +1,92 @@
-# Hybrid Data Migration & ETL Pipeline
-### Scalable Python & PySpark pipeline for data ingestion, transformation, validation, quality enforcement, and reliable loading.
+<div align="center">
 
-[![Python](https://img.shields.io/badge/Python-3.11+-3776AB?style=flat-square&logo=python&logoColor=white)](https://www.python.org/)
-[![Apache Spark](https://img.shields.io/badge/Apache_Spark-3.5%20%7C%204.2-E25A1C?style=flat-square&logo=apachespark&logoColor=white)](https://spark.apache.org/)
-[![MongoDB](https://img.shields.io/badge/MongoDB-7.0%20%7C%208.0-47A248?style=flat-square&logo=mongodb&logoColor=white)](https://www.mongodb.com/)
-[![Test Suite](https://img.shields.io/badge/Tests-15%20Passed%20%7C%20100%25-brightgreen?style=flat-square&logo=pytest&logoColor=white)](https://docs.pytest.org/)
-[![Architecture](https://img.shields.io/badge/Architecture-ELT%20%7C%20Zero--Loss%20Staging-blue?style=flat-square)](docs/architecture.md)
+# ⚡ Data Migration & Quality Pipeline
+### *Production-Grade Hybrid Data Migration & Automated Quality Enforcement Engine*
+
+**Zero data loss. Automated routing between Python Streaming & Distributed PySpark. 9 Deterministic Quality Rules. Granular Quarantine & Audit Trails.**
+
+<p align="center">
+  <a href="https://github.com/mohammed-m-alhaj/data-migration-pipeline/stargazers"><img src="https://img.shields.io/github/stars/mohammed-m-alhaj/data-migration-pipeline?style=for-the-badge&logo=github&color=gold" alt="GitHub Stars"></a>
+  <a href="https://github.com/mohammed-m-alhaj/data-migration-pipeline/network/members"><img src="https://img.shields.io/github/forks/mohammed-m-alhaj/data-migration-pipeline?style=for-the-badge&logo=github&color=blue" alt="GitHub Forks"></a>
+  <a href="LICENSE"><img src="https://img.shields.io/badge/License-MIT-green.svg?style=for-the-badge" alt="License: MIT"></a>
+  <a href="https://www.python.org/"><img src="https://img.shields.io/badge/Python-3.11+-3776AB?style=for-the-badge&logo=python&logoColor=white" alt="Python 3.11+"></a>
+  <a href="https://spark.apache.org/"><img src="https://img.shields.io/badge/Apache_Spark-3.5%20%7C%204.2-E25A1C?style=for-the-badge&logo=apachespark&logoColor=white" alt="Apache Spark"></a>
+  <a href="https://www.mongodb.com/"><img src="https://img.shields.io/badge/MongoDB-7.0%20%7C%208.0-47A248?style=for-the-badge&logo=mongodb&logoColor=white" alt="MongoDB"></a>
+  <a href="https://docs.pytest.org/"><img src="https://img.shields.io/badge/Tests-15%20Passed%20%7C%20100%25-brightgreen?style=for-the-badge&logo=pytest&logoColor=white" alt="PyTest Suite"></a>
+  <a href="https://github.com/mohammed-m-alhaj/data-migration-pipeline/pulls"><img src="https://img.shields.io/badge/PRs-Welcome-brightgreen?style=for-the-badge" alt="PRs Welcome"></a>
+</p>
+
+[Quick Start](#-quick-start-in-60-seconds) • [Architecture](#3-architecture) • [Quality Rules](#6-data-quality-engine) • [Benchmarks](#16-scalability--performance) • [Contributing](#-contributing--community)
+
+</div>
+
+---
+
+## 💡 Why `data-migration-pipeline`?
+
+Migrating legacy and dirty tabular data into modern databases is plagued by recurring engineering headaches:
+* ❌ **Pipelines crash on dirty regional data:** Eastern Arabic digits (`٠-٩`), colloquial currency strings (`12,000 ريال يمني`), word prices (`خمسة آلاف`), and non-standard timestamps break rigid schemas.
+* ❌ **Silent data loss:** Traditional ETL scripts drop invalid rows quietly without logging, leading to missing financial transactions and auditing nightmares.
+* ❌ **The Memory vs. Latency Trap:** Pandas consumes $O(N)$ memory and crashes on large files. Conversely, spinning up Apache Spark for small files incurs wasteful JVM startup overhead.
+* ❌ **Duplicate entries on re-runs:** Network hiccups or repeated batch runs produce duplicated rows and inflated metrics.
+
+### ✨ The Solution
+**`data-migration-pipeline`** provides an **adaptive hybrid ELT architecture**:
+1. **Dynamic Router:** Inspects file sizes and automatically selects **Python Streaming Batch** ($O(1)$ memory, sub-second startup) for files $\le 200\text{ MB}$, or **Distributed PySpark** (16 parallel partitions, cluster-ready) for files $> 200\text{ MB}$.
+2. **Zero-Loss Raw Ingestion:** Ingests untouched input payloads into `orders_raw` before applying any transformations, preserving forensic data lineage (`run_id`, `source_file`, `source_row_number`, UTC timestamp).
+3. **Deterministic Quality Engine:** Cleans and normalizes records across 9 automated rules with full audit tracking (`corrections` array).
+4. **Isolated Quarantine Layer:** Categorizes corrupted records into `orders_quarantine` using 13 diagnostic error codes without halting the pipeline.
+5. **Cryptographic Idempotency:** Uses SHA-256 record hashing and MongoDB atomic upserts (`order_id`) to ensure safe, duplicate-free re-runs.
+
+---
+
+## ⚡ Quick Start in 60 Seconds
+
+### 1. Clone & Install
+```bash
+git clone https://github.com/mohammed-m-alhaj/data-migration-pipeline.git
+cd data-migration-pipeline
+python -m venv .venv
+# Windows: .\.venv\Scripts\Activate.ps1 | Linux/macOS: source .venv/bin/activate
+pip install -r requirements.txt
+```
+
+### 2. Configure Environment (`.env`)
+```bash
+# Defaults connect directly to a standard local MongoDB instance
+echo "MONGO_URI=mongodb://127.0.0.1:27017" > .env
+echo "MONGO_DATABASE=midterm_pipeline" >> .env
+echo "PIPELINE_SPARK_MASTER=local[*]" >> .env
+```
+
+### 3. Initialize & Run
+```bash
+# Initialize MongoDB collections, indexes, and strict JSON schemas
+python src/mongo_setup.py
+
+# Run the automated multi-scenario test suite (generates test files & runs end-to-end)
+python src/run_4_files_full_test.py
+```
+
+### 4. Run PyTest Unit Tests
+```bash
+python -m pytest tests/ -v
+# Output: 15 passed in 0.02s (100% pass rate)
+```
+
+---
+
+## 🔍 Data Transformation: Before & After
+
+| Field | Raw Dirty Input Record | Sanitized Valid Record (`orders_validated`) | Audit Trail Entry (`corrections[]`) |
+|---|---|---|---|
+| **Phone** | `"٠٠٩٦٧٧٧١٢٣٤٥٦٧"` | `"+967771234567"` | `{"field": "customer_phone", "rule": "PHONE_NORMALIZE"}` |
+| **Email** | `"user@@company..com"` | `"user@company.com"` | `{"field": "customer_email", "rule": "EMAIL_REPEATED_SYMBOLS"}` |
+| **Delivery Cost**| `"ألفان ريال"` | `2000.0` (Double) | `{"field": "delivery_cost", "rule": "MONEY_NORMALIZE"}` |
+| **Order Date** | `"25/08/2026"` | `"2026-08-25T00:00:00"` | `{"field": "order_date", "rule": "DATE_STANDARDIZE"}` |
+| **Status** | `"مدفوع"` | `"تم الدفع"` | `{"field": "status", "rule": "STATUS_STANDARDIZE"}` |
+| **Currency** | `"ريال يمني"` | `"YER"` | `{"field": "currency", "rule": "CURRENCY_STANDARDIZE"}` |
+| **Total Amount**| `"٥٠٠٠٠ ريال"` *(wrong)*| `12000.0` *(Σ Items + Delivery)*| `{"field": "total_amount", "rule": "TOTAL_RECALCULATE"}` |
 
 ---
 
@@ -29,14 +110,15 @@
 17. [Engineering Practices](#17-engineering-practices)
 18. [Use Cases](#18-use-cases)
 19. [Relevance to Data Migration & ETL Roles](#19-relevance-to-data-migration--etl-roles)
-20. [Future Improvements](#20-future-improvements)
-21. [Author](#21-author)
+20. [Extensibility: Adding Custom Rules](#20-extensibility-adding-custom-rules)
+21. [Future Improvements](#21-future-improvements)
+22. [Author & Community](#22-author--community)
 
 ---
 
 ## 1. Overview
 
-The **Hybrid Data Migration & ETL Pipeline** is a modular data integration and quality validation system built in Python and Apache Spark (PySpark), targeting MongoDB as the destination operational datastore. It processes high-volume, heterogeneous tabular datasets (modeled around multi-field e-commerce order records) that exhibit real-world data corruption: Eastern Arabic numerals (`٠-٩`), colloquial currency notations, word-based numbers, malformed contact info, broken timestamps, and arithmetic inconsistencies.
+The **Hybrid Data Migration & ETL Pipeline** is an open-source, production-grade data integration system built in Python and Apache Spark (PySpark), targeting MongoDB as the destination datastore. It processes high-volume, heterogeneous tabular datasets that exhibit real-world data corruption: Eastern Arabic numerals, colloquial currency labels, word-based numbers, malformed contact details, broken timestamps, and arithmetic inconsistencies.
 
 ### Pipeline Model: Hybrid ELT
 The pipeline implements an **ELT (Extract $\rightarrow$ Load $\rightarrow$ Transform)** architecture:
@@ -279,19 +361,6 @@ Rather than discarding malformed data, records failing critical validation crite
 | `INVALID_AMOUNT` | String failed numeric conversion to `DoubleType` | Non-numeric money entry |
 | `INVALID_CURRENCY` | Currency is not null and cannot be resolved to `YER` | Unsupported currency code |
 
-### Quarantine Document Structure
-```json
-{
-  "_id": {"$oid": "66d63..."},
-  "run_id": "61e95d3db56147cd83fe806c26f861bb",
-  "order_id": "ORD-INVALID-99",
-  "error_codes": ["INVALID_IMPOSSIBLE_DATE", "UNKNOWN_PRICE", "MULTIPLE_CONFLICTING_ERRORS"],
-  "error_details": "INVALID_IMPOSSIBLE_DATE,UNKNOWN_PRICE,MULTIPLE_CONFLICTING_ERRORS",
-  "quality_status": "quarantine",
-  "raw_record": "{\"order_id\":\"ORD-INVALID-99\",\"order_date\":\"2026-04-31\",...}"
-}
-```
-
 ---
 
 ## 10. Technology Stack
@@ -313,7 +382,7 @@ Rather than discarding malformed data, records failing critical validation crite
 ## 11. Project Structure
 
 ```text
-Enterprise Data Migration & Quality Pipeline/
+data-migration-pipeline/
 ├── cluster/                         # Cluster lifecycle and execution scripts
 │   ├── check_versions.ps1           # Environment and dependency verification
 │   ├── run_path_a.ps1               # Executes pipeline on Spark Standalone cluster (PowerShell)
@@ -336,10 +405,6 @@ Enterprise Data Migration & Quality Pipeline/
 │   └── troubleshooting.md           # Common errors and resolution guides
 ├── reports/                         # Execution telemetry, benchmarks, and proofs
 │   ├── evidence/                    # Raw console outputs and daemon statuses
-│   │   ├── 01_mongodb_setup.txt
-│   │   ├── 02_spark_cluster_alive.json
-│   │   ├── 02_spark_master_status.json
-│   │   └── 03_path_a_spark_standalone_run.txt
 │   ├── screenshots/                 # High-resolution visual proof of execution
 │   ├── results.json                 # Machine-readable performance metrics history
 │   └── results.md                   # Human-readable execution summaries
@@ -370,6 +435,7 @@ Enterprise Data Migration & Quality Pipeline/
 ├── .gitignore                       # Git exclusion rules (protects large datasets & logs)
 ├── DIAGRAM.cd                       # Class and component architecture diagram
 ├── DIAGRAM.md                       # Comprehensive suite of 9 interactive Mermaid diagrams
+├── LICENSE                          # MIT Open Source License
 ├── requirements.txt                 # Pinned project dependencies
 └── README.md                        # Primary project documentation
 ```
@@ -396,8 +462,8 @@ mongosh --version  # Expect: mongosh version 2.x+
 
 1. **Clone the repository:**
    ```bash
-   git clone https://github.com/mohammed-m-alhaj/enterprise-data-migration-_-quality-pipeline.git
-   cd enterprise-data-migration-_-quality-pipeline
+   git clone https://github.com/mohammed-m-alhaj/data-migration-pipeline.git
+   cd data-migration-pipeline
    ```
 
 2. **Configure Python Virtual Environment:**
@@ -492,12 +558,6 @@ To execute using an actual Spark Standalone cluster with Master/Worker daemons:
   bash cluster/start_master.sh
   bash cluster/run_path_a.sh --input-file "data/orders_huge_mixed_quality.csv"
   ```
-
-### 4. Running the Multi-Scenario Test Harness
-To automatically generate test files covering clean, dirty, large, and idempotency scenarios and run them end-to-end:
-```bash
-python src/run_4_files_full_test.py
-```
 
 ---
 
@@ -620,10 +680,6 @@ tests/test_cleaning_rules.py::test_none_handling PASSED                  [100%]
 ============================= 15 passed in 0.02s ==============================
 ```
 
-### Test Scope
-* **Classification Logic (`test_classification.py` - 5 tests):** Verifies single-code quarantines, multi-code conflict aggregation, error-free valid paths, comprehensive mapping for all 13 error codes, and distinctions between `valid` and `corrected`.
-* **Data Cleaning Rules (`test_cleaning_rules.py` - 10 tests):** Verifies numeral conversions, symbol and whitespace stripping, thousands separators, word-to-number dictionary lookups, Yemeni phone prefix permutations, email repair patterns, status synonym dictionaries, and safe handling of `None` / empty values.
-
 ---
 
 ## 16. Scalability & Performance
@@ -642,7 +698,6 @@ AdaptiveSparkPlan isFinalPlan=true
       +- Exchange RoundRobinPartitioning(16), REPARTITION_BY_NUM, [plan_id=9]
          +- FileScan csv [17 columns] Format: CSV, ReadSchema: struct<...>
 ```
-Applying `repartition(16)` once immediately following extraction balances workloads across available CPU cores and enables concurrent bulk socket connections to MongoDB via the MongoDB Spark connector.
 
 ### 3. Empirical Benchmark Summary (Recorded Execution Telemetry)
 
@@ -697,19 +752,62 @@ The engineering patterns implemented in this repository map directly to core res
 
 ---
 
-## 20. Future Improvements
+## 20. Extensibility: Adding Custom Rules
 
-The following architectural enhancements represent realistic technical extensions for production scaling:
-* **Relational Database Adapters:** Integrate JDBC connectors (e.g., PostgreSQL, SQL Server, Oracle) as automated extract sources alongside CSV files.
-* **Declarative Schema Mapping:** Implement a YAML-driven schema mapper allowing non-engineers to define column mapping rules without code modifications.
-* **Pipeline Orchestration:** Package the pipeline stages into an Apache Airflow DAG or Prefect flow for automated scheduling, SLA alerting, and dependency management.
-* **Change Data Capture (CDC):** Integrate Debezium or MongoDB Change Streams to support continuous real-time streaming replication alongside batch loads.
-* **Data Quality Dashboard:** Build a lightweight visualization UI (e.g., Streamlit) to monitor quarantine error distributions and batch success metrics in real time.
+The pipeline is designed to be easily extensible. To add a new data quality rule:
+
+### 1. Define the Rule in `src/quality_rules.py`:
+```python
+def normalize_zip_code(value: Any) -> str | None:
+    """Strip spaces and dashes, ensuring a 5-digit zip code."""
+    if value is None:
+        return None
+    digits = re.sub(r"\D", "", str(value))
+    return digits if len(digits) == 5 else None
+```
+
+### 2. Add Corresponding Unit Test in `tests/test_cleaning_rules.py`:
+```python
+def test_zip_code_normalization():
+    assert normalize_zip_code("902-10") == "90210"
+    assert normalize_zip_code("invalid") is None
+```
+
+### 3. Register PySpark Expression in `src/elt_pipeline.py`:
+```python
+parsed = parsed.withColumn(
+    "zip_code_clean",
+    F.regexp_replace(F.col("zip_code"), r"[^\d]", "")
+)
+```
 
 ---
 
-## 21. Author
+## 21. Future Improvements
+
+* **Relational Database Adapters:** Integrate JDBC connectors (PostgreSQL, MySQL, SQL Server, Oracle) as automated extract sources alongside CSV files.
+* **Declarative Schema Mapping:** YAML-driven configuration layer allowing non-engineers to define custom source-to-target field mappings.
+* **Pipeline Orchestration:** Pre-built Apache Airflow DAG and Prefect flow templates for enterprise scheduling and alerting.
+* **Change Data Capture (CDC):** Real-time streaming connector via Debezium and MongoDB Change Streams.
+* **Web UI Dashboard:** Streamlit monitoring dashboard for quarantine triage and pipeline throughput visualization.
+
+---
+
+## 22. Author & Community
 
 **Mohammed AL-Haj**  
 *AI Engineer \| Data Engineering & Applied AI*  
-GitHub: [https://github.com/mohammed-m-alhaj](https://github.com/mohammed-m-alhaj)
+GitHub: [@mohammed-m-alhaj](https://github.com/mohammed-m-alhaj)  
+Repository: [mohammed-m-alhaj/data-migration-pipeline](https://github.com/mohammed-m-alhaj/data-migration-pipeline)
+
+---
+
+<div align="center">
+
+### ⭐ Support This Project!
+If you find this pipeline helpful, please consider **starring the repository on GitHub**!  
+It helps other engineers discover the project and supports future open-source development.
+
+[⭐ Star on GitHub](https://github.com/mohammed-m-alhaj/data-migration-pipeline)
+
+</div>
